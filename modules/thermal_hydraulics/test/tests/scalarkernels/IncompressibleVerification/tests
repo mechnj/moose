@@ -278,7 +278,7 @@
     csvdiff = 'heat.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat" ScalarKernels/temp1/is_implicit=False'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature with explicit property integration.'
   []
   [heatADexp]
     type = CSVDiff
@@ -286,7 +286,7 @@
     csvdiff = 'heat.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat" ScalarKernels/temp1/is_implicit=False ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature with explicit property integration.'
   []
   [heat_reverse]
     type = CSVDiff
@@ -310,7 +310,7 @@
     csvdiff = 'heat_twoseg.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat_twoseg"'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature of N segments.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature of 2 segments.'
   []
   [heatAD_twoseg]
     type = CSVDiff
@@ -318,7 +318,7 @@
     csvdiff = 'heat_twoseg.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat_twoseg" ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of N segments.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of 2 segments.'
   []
   [heat_threeseg]
     type = CSVDiff
@@ -326,7 +326,7 @@
     csvdiff = 'heat_threeseg.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat_threeseg"'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature of N segments.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature of 3 segments.'
   []
   [heatAD_threeseg]
     type = CSVDiff
@@ -334,6 +334,6 @@
     csvdiff = 'heat_threeseg.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'Outputs/out/file_base="heat_threeseg" ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp3/type=ADIncompressibleEnergySPScalarKernel'
-    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of N segments.'
+    requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of 3 segments.'
   []
 []
