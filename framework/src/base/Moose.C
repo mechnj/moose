@@ -64,6 +64,12 @@ const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
 namespace Moose
 {
 
+bool
+isSolverExecFlag(const ExecFlagType & exec_flag)
+{
+  return exec_flag == EXEC_LINEAR || exec_flag == EXEC_NONLINEAR || exec_flag == EXEC_POSTCHECK;
+}
+
 void associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory);
 
 void
@@ -530,15 +536,6 @@ addActionTypes(Syntax & syntax)
   // kernels only need fespaces, not hierarchies
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
-  // add QuadratureFunctions
-  registerMooseObjectTask("add_mfem_quadrature_functions", MFEMQuadratureFunction, false);
-  // after the last task declaring coefficients the quadrature functions may project
-  addTaskDependency("add_mfem_quadrature_functions", "add_functor_material");
-  // before the tasks constructing objects that may consume the declared coefficients
-  addTaskDependency("add_kernel", "add_mfem_quadrature_functions");
-  addTaskDependency("add_bc", "add_mfem_quadrature_functions");
-  addTaskDependency("add_aux_kernel", "add_mfem_quadrature_functions");
-
   // add complex kernels
   registerMooseObjectTask("add_mfem_complex_kernel_components", Kernel, false);
   registerMooseObjectTask("add_mfem_complex_bc_components", BoundaryCondition, false);
@@ -846,8 +843,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
-  registerSyntaxTask(
-      "AddMFEMQuadratureFunctionAction", "QuadratureFunctions/*", "add_mfem_quadrature_functions");
   registerSyntaxTask(
       "AddMFEMFESpaceHierarchyAction", "FESpaceHierarchies/*", "add_mfem_fespace_hierarchies");
   registerSyntaxTask(

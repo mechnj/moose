@@ -58,8 +58,6 @@
 
 #include <ios>
 
-using namespace libMesh;
-
 namespace Moose
 {
 void
@@ -77,7 +75,7 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
 LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : SolverSystem(fe_problem, fe_problem, name, Moose::VAR_SOLVER),
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "LinearSystem"),
-    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
@@ -114,10 +112,18 @@ LinearSystem::preInit()
 }
 
 void
+LinearSystem::initSolutionState()
+{
+  SolverSystem::initSolutionState();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 LinearSystem::initialSetup()
 {
   SystemBase::initialSetup();
   _current_solution = system().current_local_solution.get();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
   // Checking if somebody accidentally assigned nonlinear variables to this system
   const auto & var_names = _vars[0].names();
   for (const auto & name : var_names)
@@ -125,8 +131,6 @@ LinearSystem::initialSetup()
       mooseError("You are trying to add a nonlinear variable to a linear system! The variable "
                  "which is assigned to the wrong system: ",
                  name);
-
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
 
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -177,7 +181,21 @@ void
 LinearSystem::reinit()
 {
   _current_solution = system().current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
+}
+
+void
+LinearSystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
+                                           const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+}
+
+void
+LinearSystem::restoreAdditionalStates()
+{
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void
@@ -317,7 +335,7 @@ LinearSystem::solve()
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
   auto & linear_solver =
-      cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+      cast_ref<libMesh::PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
   _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
   _converged = linear_solver.get_converged_reason() > 0;

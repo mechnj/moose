@@ -33,8 +33,6 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/static_condensation.h"
 
-using namespace libMesh;
-
 /// Free function used for a libMesh callback
 void
 extraSendList(std::vector<dof_id_type> & send_list, void * context)
@@ -45,7 +43,7 @@ extraSendList(std::vector<dof_id_type> & send_list, void * context)
 
 /// Free function used for a libMesh callback
 void
-extraSparsity(SparsityPattern::Graph & sparsity,
+extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
               std::vector<dof_id_type> & n_nz,
               std::vector<dof_id_type> & n_oz,
               void * context)
@@ -359,7 +357,7 @@ SystemBase::reinitElem(const Elem * const elem, THREAD_ID tid)
     for (auto & [tag, matrix] : _active_tagged_matrices)
     {
       libmesh_ignore(tag);
-      cast_ptr<StaticCondensation *>(matrix)->set_current_elem(*elem);
+      cast_ptr<libMesh::StaticCondensation *>(matrix)->set_current_elem(*elem);
     }
 }
 
@@ -487,7 +485,7 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
         // Have to get each variable's dofs
         for (unsigned int v = 0; v < n_vars; v++)
         {
-          const Variable & var = sys.variable(v);
+          const libMesh::Variable & var = sys.variable(v);
           unsigned int var_num = var.number();
           unsigned int n_comp = var.n_components();
 
@@ -604,7 +602,9 @@ SystemBase::removeMatrix(TagID tag_id)
 }
 
 NumericVector<Number> &
-SystemBase::addVector(const std::string & vector_name, const bool project, const ParallelType type)
+SystemBase::addVector(const std::string & vector_name,
+                      const bool project,
+                      const libMesh::ParallelType type)
 {
   if (hasVector(vector_name))
     return getVector(vector_name);
@@ -614,7 +614,7 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
 }
 
 NumericVector<Number> &
-SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
+SystemBase::addVector(TagID tag, const bool project, const libMesh::ParallelType type)
 {
   if (!_subproblem.vectorTagExists(tag))
     mooseError("Cannot add tagged vector with TagID ",
@@ -627,7 +627,7 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
   {
     auto & vec = getVector(tag);
 
-    if (type != ParallelType::AUTOMATIC && vec.type() != type)
+    if (type != AUTOMATIC && vec.type() != type)
       mooseError("Cannot add tagged vector '",
                  _subproblem.vectorTagName(tag),
                  "', in system '",
@@ -741,7 +741,7 @@ SystemBase::addVariable(const std::string & var_type,
 
   if (var_type == "ArrayMooseVariable")
   {
-    if (fe_field_type == TYPE_VECTOR)
+    if (fe_field_type == libMesh::TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
     std::vector<std::string> array_var_component_names;
@@ -1262,16 +1262,24 @@ SystemBase::copySolutionsBackwards()
 }
 
 void
+SystemBase::copyStateHistoryBackwards()
+{
+  system().update();
+  advanceStateHistory(Moose::SolutionIterationType::Time);
+  advanceStateHistory(Moose::SolutionIterationType::Nonlinear);
+}
+
+void
 SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_type)
 {
+  // Normally copy through old (index 1). For Time, optionally stop at older
+  // and leave old unchanged.
+  const bool skip_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+
   const auto num_states = getNumSolutionStates(iteration_type);
   if (num_states > 1)
   {
-    // Normally copy through old (index 1). For Time, optionally stop at older
-    // and leave old unchanged.
-    const bool skip_old =
-        iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
-
     const std::size_t stop = skip_old ? 1 : 0;
     for (std::size_t i = num_states - 1; i > stop; --i)
       solutionState(i, iteration_type) = solutionState(i - 1, iteration_type);
@@ -1296,6 +1304,15 @@ SystemBase::copyPreviousSolutions(const Moose::SolutionIterationType iteration_t
     case Moose::SolutionIterationType::Count:
       break;
   }
+}
+
+void
+SystemBase::advanceStateHistory(const Moose::SolutionIterationType iteration_type)
+{
+  const bool skip_current_to_old =
+      iteration_type == Moose::SolutionIterationType::Time && _skip_next_solution_to_old_copy;
+  copyPreviousSolutions(iteration_type);
+  copyAdditionalStateBackwards(iteration_type, skip_current_to_old);
 }
 
 /**
@@ -1325,6 +1342,13 @@ SystemBase::restoreSolutions()
   if (solutionPreviousNewton())
     *solutionPreviousNewton() = solutionOld();
   system().update();
+}
+
+void
+SystemBase::restoreStateHistory()
+{
+  restoreSolutions();
+  restoreAdditionalStates();
 }
 
 void
@@ -1556,7 +1580,7 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 void
 SystemBase::addScalingVector()
 {
-  addVector("scaling_factors", /*project=*/false, libMesh::ParallelType::GHOSTED);
+  addVector("scaling_factors", /*project=*/false, GHOSTED);
   _subproblem.hasScalingVector(number());
 }
 
