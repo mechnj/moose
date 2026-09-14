@@ -144,8 +144,6 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 // Anonymous namespace for helper function
 namespace
 {
@@ -2344,7 +2342,7 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
       for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
       {
         // the highest available order in libMesh is 43
-        _scalar_zero[tid].resize(FORTYTHIRD, 0);
+        _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
         _zero[tid].resize(max_qpts, 0);
         _grad_zero[tid].resize(max_qpts, RealGradient(0.));
         _second_zero[tid].resize(max_qpts, RealTensor(0.));
@@ -2986,7 +2984,7 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
 
     if (curr_sys_ptr->hasVariable(var_name))
     {
-      const Variable & var =
+      const libMesh::Variable & var =
           curr_sys_ptr->system().variable(curr_sys_ptr->system().variable_number(var_name));
 
       // variable type
@@ -3428,7 +3426,7 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
     var_type = "MooseVariableConstMonomial";
   else if (type.family == SCALAR)
     var_type = "MooseVariableScalar";
-  else if (FEInterface::field_type(type) == TYPE_VECTOR)
+  else if (FEInterface::field_type(type) == libMesh::TYPE_VECTOR)
     var_type = "VectorMooseVariable";
   else
     var_type = "MooseVariable";
@@ -5450,6 +5448,13 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     computeUserObjectsInternal(type,
                                query.clone().condition<AttribExecutionOrderGroup>(execution_group));
   }
+
+  // Exceptions raised on solver execution flags are communicated and handled by the PARALLEL_CATCH
+  // surrounding the assembly loops of the residual, Jacobian and linear systems. On all other
+  // execution flags there is no solve left to fail, so the exception is communicated here in order
+  // to report it at the point of the simulation where it was raised
+  if (!Moose::isSolverExecFlag(_current_execute_on_flag))
+    checkExceptionAndStopSolve();
 }
 
 void
@@ -6683,7 +6688,7 @@ FEProblemBase::updateMaxQps()
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     // the highest available order in libMesh is 43
-    _scalar_zero[tid].resize(FORTYTHIRD, 0);
+    _scalar_zero[tid].resize(libMesh::FORTYTHIRD, 0);
     _zero[tid].resize(max_qpts, 0);
     _ad_zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
@@ -7157,8 +7162,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
   {
     _communicator.broadcast(_exception_message, processor_id);
 
-    if (_current_execute_on_flag == EXEC_LINEAR || _current_execute_on_flag == EXEC_NONLINEAR ||
-        _current_execute_on_flag == EXEC_POSTCHECK)
+    if (Moose::isSolverExecFlag(_current_execute_on_flag))
     {
       // Print the message
       if (_communicator.rank() == 0 && print_message)
@@ -7307,8 +7311,8 @@ FEProblemBase::copySolutionsBackwards()
   TIME_SECTION("copySolutionsBackwards", 3, "Copying Solutions Backward");
 
   for (auto & sys : _solver_systems)
-    sys->copySolutionsBackwards();
-  _aux->copySolutionsBackwards();
+    sys->copyStateHistoryBackwards();
+  _aux->copyStateHistoryBackwards();
 }
 
 void
@@ -7325,14 +7329,14 @@ FEProblemBase::advanceState()
   TIME_SECTION("advanceState", 5, "Advancing State");
 
   for (auto & sys : _solver_systems)
-    sys->copyOldSolutions();
-  _aux->copyOldSolutions();
+    sys->advanceStateHistory(Moose::SolutionIterationType::Time);
+  _aux->advanceStateHistory(Moose::SolutionIterationType::Time);
 
   if (_displaced_problem)
   {
     for (const auto i : index_range(_solver_systems))
-      _displaced_problem->solverSys(i).copyOldSolutions();
-    _displaced_problem->auxSys().copyOldSolutions();
+      _displaced_problem->solverSys(i).advanceStateHistory(Moose::SolutionIterationType::Time);
+    _displaced_problem->auxSys().advanceStateHistory(Moose::SolutionIterationType::Time);
   }
 
   _reporter_data.copyValuesBack();
@@ -7373,12 +7377,12 @@ FEProblemBase::restoreSolutions()
   {
     if (_verbose_restore)
       _console << "Restoring solutions on system " << sys->name() << "..." << std::endl;
-    sys->restoreSolutions();
+    sys->restoreStateHistory();
   }
 
   if (_verbose_restore)
     _console << "Restoring solutions on Auxiliary system..." << std::endl;
-  _aux->restoreSolutions();
+  _aux->restoreStateHistory();
 
   if (_verbose_restore)
     _console << "Restoring postprocessor, vector-postprocessor, and reporter data..." << std::endl;
@@ -8835,6 +8839,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
+  const bool should_contract = contract_mesh && allowMeshContractionAfterMeshChanged();
+
   _app.markMeshChangedForBackup();
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
@@ -8858,14 +8864,14 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   else
     es().reinit();
 
-  if (contract_mesh)
+  if (should_contract)
     // Once vectors are restricted, we can delete children of coarsened elements
     _mesh.getMesh().contract();
   if (clean_refinement_flags)
   {
     // Finally clear refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clear flags they won't run into trouble
-    MeshRefinement refinement(_mesh.getMesh());
+    libMesh::MeshRefinement refinement(_mesh.getMesh());
     refinement.clean_refinement_flags();
   }
 
@@ -8903,7 +8909,13 @@ FEProblemBase::meshChanged(const bool intermediate_change,
 
   if (_displaced_problem)
   {
-    _displaced_problem->meshChanged(contract_mesh, clean_refinement_flags);
+    // Mesh contraction is necessary when a displaced problem is used.
+    if (!allowMeshContractionAfterMeshChanged())
+      mooseError("Disabling mesh contraction is not implemented when a displaced problem is used. "
+                 "Please contact a "
+                 "developer of this application to discuss the combination of these features.");
+
+    _displaced_problem->meshChanged(should_contract, clean_refinement_flags);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
 
@@ -9663,6 +9675,13 @@ FEProblemBase::addOutput(const std::string & object_type,
   if (object_type == "Console" && _app.getParam<bool>("show_input") &&
       parameters.get<bool>("output_screen"))
     parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
+
+  // Record whether this object's own block set 'file_base' itself before a common 'file_base'
+  // from the [Outputs] block, if any, is copied down onto it below -- that copy makes
+  // 'file_base' look valid and user-set on this object even when only the common block set it
+  // (see #4215), so this must be captured first.
+  if (parameters.isParamDefined("_file_base_set_by_own_block"))
+    parameters.set<bool>("_file_base_set_by_own_block") = parameters.isParamSetByUser("file_base");
 
   // Apply only user-set parameters from the common [Outputs] block so that
   // each output type's own defaults are not overridden by common defaults.

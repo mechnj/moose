@@ -34,14 +34,12 @@
 // C++
 #include <cstring> // for "Jacobian" exception test
 
-using namespace libMesh;
-
 // AuxiliarySystem ////////
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, subproblem, name, Moose::VAR_AUXILIARY),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
-    LinearFVGradientInterface(cast_ref<SystemBase &>(*this)),
+    LinearFVGradientManager(cast_ref<SystemBase &>(*this)),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
@@ -72,13 +70,20 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
+AuxiliarySystem::initSolutionState()
+{
+  SystemBase::initSolutionState();
+  LinearFVGradientManager::initializeLinearFVGradientHistoryStorage();
+}
+
+void
 AuxiliarySystem::initialSetup()
 {
   TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
 
   SystemBase::initialSetup();
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::initializeLinearFVGradientStorage();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -120,7 +125,21 @@ void
 AuxiliarySystem::reinit()
 {
   _current_solution = _sys.current_local_solution.get();
-  LinearFVGradientInterface::rebuildLinearFVGradientStorage();
+  LinearFVGradientManager::rebuildLinearFVGradientStorage();
+}
+
+void
+AuxiliarySystem::copyAdditionalStateBackwards(const Moose::SolutionIterationType iteration_type,
+                                              const bool skip_current_to_old)
+{
+  if (iteration_type == Moose::SolutionIterationType::Time)
+    LinearFVGradientManager::copyPreviousGradientStates(iteration_type, skip_current_to_old);
+}
+
+void
+AuxiliarySystem::restoreAdditionalStates()
+{
+  LinearFVGradientManager::restoreGradientStates();
 }
 
 void
@@ -269,7 +288,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (FEInterface::field_type(fe_type) == TYPE_VECTOR)
+    if (FEInterface::field_type(fe_type) == libMesh::TYPE_VECTOR)
     {
       auto * var = _vars[tid].getActualFieldVariable<RealVectorValue>(name);
       if (var)
@@ -872,7 +891,7 @@ AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
+AuxiliarySystem::augmentSparsity(libMesh::SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<dof_id_type> & /*n_nz*/,
                                  std::vector<dof_id_type> &
                                  /*n_oz*/)

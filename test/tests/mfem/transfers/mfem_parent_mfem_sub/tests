@@ -16,15 +16,14 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMShapeEvaluationTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]
@@ -117,15 +116,14 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/FromSubToParent/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ToSubFromParent]
@@ -142,15 +140,14 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  u
-                  OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu
-                  u
-                  OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/parent_line_sample_0001.csv
+                  OutputData/sub_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/ToSubFromParent/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [ComplexFromSubToParent]

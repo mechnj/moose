@@ -15,15 +15,14 @@
       []
       [verify]
         type = RunCommand
-        command = '../check.sh
-                  recv
-                  OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
-                  send
-                  OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
+        command = 'python -m mooseutils.csvdiff
+                  OutputData/recv_line_sample_0001.csv
+                  OutputData/send_line_sample_0001.csv'
         prereq = MFEMCopyTransfer/test/run
         capabilities = 'mfem'
         recover = false
         detail = 'checking the sub-application and parent application outputs against each other.'
+        min_slots = 4 # occasionally uses lots of memory
       []
     []
     [error]
