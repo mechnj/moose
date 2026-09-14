@@ -216,7 +216,7 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobian()
       // Decide flow regime for friction factor
       auto _Dh = 4.0 * (*(_areas[i]))(_qp, _state) / (*(_perimeters[i]))(_qp, _state);
       auto _G = Base::_u[_i] / (*(_areas[i]))(_qp, _state);
-      auto _Re = _G * _Dh / _mu;
+      auto _Re = abs(_G) * _Dh / _mu;
       auto _lam = 64.0 / _Re;
       auto _turb =
           0.25 /
