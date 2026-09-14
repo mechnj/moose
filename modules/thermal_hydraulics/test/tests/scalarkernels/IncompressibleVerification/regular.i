@@ -6,10 +6,8 @@ min = 1.0
 Pin = 101300
 dP = -10130
 Tin = 293.15
-Tout = 323.15
+rho = 998.2
 mu = 0.001002
-cp = 4185.0
-k = 0.598
 alpha = 0.0
 epsilon = 0.0001
 forms = 0.0
@@ -34,21 +32,9 @@ area = ${fparse 3.14159* ${R}^2}
         family = SCALAR
         initial_condition = ${dP}
     []
-    [T0]
-        family = SCALAR
-        initial_condition = ${Tin}
-    []
     [T1]
         family = SCALAR
         initial_condition = ${Tin}
-    []
-    [Tw]
-        family = SCALAR
-        initial_condition = ${Tout}
-    []
-    [T2]
-        family = SCALAR
-        initial_condition = ${Tout}
     []
 []
 
@@ -76,34 +62,10 @@ area = ${fparse 3.14159* ${R}^2}
         g = ${gravity}
         is_implicit = True
     []
-    [temp1]
-      type = IncompressibleEnergySPScalarKernel
-      mass_flow_rate = 'm1'
-      inlet_temperature = 'T0'
-      outlet_temperature = 'T2'
-      wall_temperature = 'Tw'
-      area = ${area}
-      fp = water
-      length = ${length}
-      perimeter = ${fparse 2*3.14159* ${R}}
-      reference_pressure = ${Pin}
+    [temp]
+      type = ParsedODEKernel
+      expression = 'T1 - ${Tin}'
       variable = T1
-      is_implicit = True
-    []
-    [temp0]
-      type = ParsedODEKernel
-      expression = 'T0 - ${Tin}'
-      variable = T0
-    []
-    [temp2]
-      type = ParsedODEKernel
-      expression = 'T2 - ${Tout}'
-      variable = T2
-    []
-    [walltemp]
-      type = ParsedODEKernel
-      expression = 'Tw - ${Tout}'
-      variable = Tw
     []
     [dPk]
       type = ParsedODEKernel
@@ -113,49 +75,33 @@ area = ${fparse 3.14159* ${R}^2}
 []
 
 [Postprocessors]
-  [T]
+  [mdot]
     type = ScalarVariable
-    variable = T1
+    variable = m1
     execute_on = 'TIMESTEP_END'
   []
   [Re]
     type = ParsedPostprocessor
-    expression = 'abs(${min}) / ${area} * 2 * ${R} / ${mu}'
+    expression = 'mdot / ${area} * 2 * ${R} / ${mu}'
+    pp_names = 'mdot'
     execute_on = 'TIMESTEP_END'
   []
-  [Pr]
+  [f]
     type = ParsedPostprocessor
-    expression = '${cp} * ${mu} / ${k}'
+    expression = '0.25 / ((log10(${epsilon} / 2 / 3.7 / ${R} + 5.74 / Re ^ 0.9 ))^2)'
+    pp_names = 'Re'
     execute_on = 'TIMESTEP_END'
   []
-  [h]
+  [analytical_mdot]
     type = ParsedPostprocessor
-    expression = '0.023 * Re^0.8 * Pr^0.4'
-    pp_names = 'Re Pr'
+    expression = 'sqrt(-(${dP} + ${rho} * ${gravity} * ${length} * sin(${alpha}) - ${pump}) / (f * ${length} / 4 / ${R} / ${rho} / ${area}^2 + ${forms} / 2 / ${rho} / ${area}^2))'
+    pp_names = 'f'
     execute_on = 'TIMESTEP_END'
-  []
-  [in]
-    type = ParsedPostprocessor
-    expression = '1 / 2 * (1 - abs(${min})/${min}) * ${Tout}
-                  + 1 / 2 * (1 + abs(${min})/${min}) * ${Tin}'
-    execute_on = 'TIMESTEP_END'
-  []
-  [q]
-    type = ParsedPostprocessor
-    expression = 'h * ${fparse 2*3.14159* ${R}} / 2 * ( 2 * ${Tout} - T - in)'
-    pp_names = 'T h in'
-    execute_on = 'TIMESTEP_END'
-  []
-  [analytical_T]
-    type = ParsedPostprocessor
-    expression = '1 / abs(${min}) / ${cp} * (q * ${length} - ${min} / 2 * (1 - abs(${min})/${min}) * ${cp} * ${Tout}
-                  + ${min} / 2 * (1 + abs(${min})/${min}) * ${cp} * ${Tin}) '
-    pp_names = 'T q'
   []
   [relative_error]
     type = ParsedPostprocessor
-    expression = 'abs((analytical_T - T)/analytical_T)'
-    pp_names = 'analytical_T T'
+    expression = 'abs((analytical_mdot - mdot)/analytical_mdot)'
+    pp_names = 'analytical_mdot mdot'
     execute_on = 'TIMESTEP_END'
   []
 []
@@ -170,7 +116,7 @@ area = ${fparse 3.14159* ${R}^2}
     dt = 5
   []
   solve_type = 'PJFNK'
-  nl_abs_tol = 1e-08
+  nl_abs_tol = 1e-09
   l_tol = 1e-07
 []
 

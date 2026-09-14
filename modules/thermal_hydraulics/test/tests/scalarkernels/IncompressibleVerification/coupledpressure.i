@@ -1,32 +1,25 @@
 
 
-length1 = 1.0
-length2 = 2.0
-R1 = 0.025
-R2 = 0.05
+length = 1.0
+R = 0.025
 min = 1.0
 Pin = 101300
-dP = -10130
+dP = 10130
 Tin = 293.15
 rho = 998.2
 mu = 0.001002
-alpha1 = 0.0
-alpha2 = ${fparse 3.14159/2}
-epsilon1 = 0.0001
-epsilon2 = 0.0002
-forms1 = 0.0
-forms2 = 1.0
-pump1 = ${fparse - ${dP}}
-pump2 = 0.0
-gravity = 9.81
-area1 = ${fparse 3.14159* ${R1}^2}
-area2 = ${fparse 3.14159* ${R2}^2}
+alpha = 0.0
+epsilon = 0.0001
+forms = 0.0
+pump = 0.0
+gravity = 0.0
+area = ${fparse 3.14159* ${R}^2}
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = ${length1}
+  xmax = ${length}
   nx = 1
 []
 
@@ -56,16 +49,16 @@ area2 = ${fparse 3.14159* ${R2}^2}
         type = CoupledPressureIncompressibleMomentumSPScalarKernel
         variable = 'dPc'
         coupled_mass_flow_rate = 'm1'
-        temperatures = 'T1 T1'
+        temperatures = 'T1'
         reference_pressure = ${Pin}
         fp = 'water'
-        areas = '${area1} ${area2}'
-        perimeters = '${fparse 2*3.14159* ${R1}} ${fparse 2*3.14159* ${R2}}'
-        lengths = '${length1} ${length2}'
-        alphas = '${alpha1} ${alpha2}'
-        forms_losses = '${forms1} ${forms2}'
-        pump_pressures = '${pump1} ${pump2}'
-        roughnesses = '${epsilon1} ${epsilon2}'
+        areas = '${area}'
+        perimeters = '${fparse 2*3.14159* ${R}}'
+        lengths = '${length}'
+        alphas = '${alpha}'
+        forms_losses = '${forms}'
+        pump_pressures = '${pump}'
+        roughnesses = '${epsilon}'
         g = ${gravity}
         is_implicit = True
     []
@@ -97,40 +90,22 @@ area2 = ${fparse 3.14159* ${R2}^2}
     variable = dPc
     execute_on = 'TIMESTEP_END'
   []
-  [Re1]
+  [Re]
     type = ParsedPostprocessor
-    expression = 'mdot / ${area1} * 2 * ${R1} / ${mu}'
+    expression = 'mdot / ${area} * 2 * ${R} / ${mu}'
     pp_names = 'mdot'
     execute_on = 'TIMESTEP_END'
   []
-  [Re2]
+  [f]
     type = ParsedPostprocessor
-    expression = 'mdot / ${area2} * 2 * ${R2} / ${mu}'
-    pp_names = 'mdot'
-    execute_on = 'TIMESTEP_END'
-  []
-  [f1]
-    type = ParsedPostprocessor
-    expression = '0.25 / ((log10(${epsilon1} / 2 / 3.7 / ${R1} + 5.74 / Re1 ^ 0.9 ))^2)'
-    pp_names = 'Re1'
-    execute_on = 'TIMESTEP_END'
-  []
-  [f2]
-    type = ParsedPostprocessor
-    expression = '0.25 / ((log10(${epsilon2} / 2 / 3.7 / ${R2} + 5.74 / Re2 ^ 0.9 ))^2)'
-    pp_names = 'Re2'
+    expression = '0.25 / ((log10(${epsilon} / 2 / 3.7 / ${R} + 5.74 / Re ^ 0.9 ))^2)'
+    pp_names = 'Re'
     execute_on = 'TIMESTEP_END'
   []
   [analytical_dP]
     type = ParsedPostprocessor
-    expression = '- ${pump1} - ${pump2}
-                  + f1 * ${length1} * mdot^2 / 4 / ${R1} / ${rho} / ${area1}^2
-                  + f2 * ${length2} * mdot^2 / 4 / ${R2} / ${rho} / ${area2}^2
-                  + ${forms1} * mdot^2 / 2 / ${rho} / ${area1}^2
-                  + ${forms2} * mdot^2 / 2 / ${rho} / ${area2}^2
-                  + ${rho} * ${gravity} * ${length1} * sin(${alpha1})
-                  + ${rho} * ${gravity} * ${length2} * sin(${alpha2})'
-    pp_names = 'f1 f2 mdot'
+    expression = '-${pump} + f * ${length} * mdot^2 / 4 / ${R} / ${rho} / ${area}^2 + ${forms} * mdot^2 / 2 / ${rho} / ${area}^2 + ${rho} * ${gravity} * ${length} * sin(${alpha})'
+    pp_names = 'f mdot'
     execute_on = 'TIMESTEP_END'
   []
   [relative_error]
