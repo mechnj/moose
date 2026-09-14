@@ -105,8 +105,8 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpResidual()
 
   // Decide flow regime for HTC
   auto _Dh = 4.0 * _area(_qp, _state) / _perimeter(_qp, _state);
-  auto _G = abs(_m[_i]) / _area(_qp, _state);
-  auto _Re = _G * _Dh / _mu;
+  auto _G = _m[_i] / _area(_qp, _state);
+  auto _Re = abs(_G) * _Dh / _mu;
   auto _Pr = _mu * _cp / _k;
   // Heat transfer to fluid (Dittus-Boelter)
   auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
@@ -144,8 +144,8 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
 
     // Decide flow regime for HTC
     auto _Dh = 4.0 * _area(_qp, _state) / _perimeter(_qp, _state);
-    auto _G = abs(_m[_i]) / _area(_qp, _state);
-    auto _Re = _G * _Dh / _mu;
+    auto _G = _m[_i] / _area(_qp, _state);
+    auto _Re = abs(_G) * _Dh / _mu;
     auto _Pr = _mu * _cp / _k;
     // Heat transfer to fluid (Dittus-Boelter)
     auto _h = 0.023 * pow(_Re, 0.8) * pow(_Pr, 0.4) * _k / _Dh;
@@ -153,7 +153,7 @@ IncompressibleEnergySPScalarKernelTempl<is_ad>::computeQpJacobian()
     // Advection component
     energy_residual += abs(_m[_i]) * _cp / _length(_qp, _state);
     // Wall heat transfer
-    energy_residual += -_q;
+    energy_residual -= _q;
     // Transient term
     energy_residual += _area(_qp, _state) * _rho * _cp * Base::_du_dot_du[_i];
 

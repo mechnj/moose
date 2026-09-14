@@ -148,8 +148,9 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpResidual()
   const int _i = 0;
   const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
   // start by getting global fluid properties
-  auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), (*(_T[0]))[_i]);
-  auto _rhog = _fp.rho_from_p_T(_Pref(_qp, _state), (*(_T[0]))[_i]);
+  auto _avetemp = ((*(_T[0]))[_i] + (*(_T[_T.size() - 1]))[_i]) / 2;
+  auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), _avetemp);
+  auto _rhog = _fp.rho_from_p_T(_Pref(_qp, _state), _avetemp);
   // loop over segments
   for (size_t i = 0; i < _n_segments; ++i)
   {
@@ -208,8 +209,9 @@ IncompressibleMomentumSPScalarKernelTempl<is_ad>::computeQpJacobian()
     const int _i = 0;
     const auto _state = _is_implicit ? Moose::currentState() : Moose::oldState();
     // start by getting global fluid properties
-    auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), (*(_T[0]))[_i]);
-    auto _rhog = _fp.rho_from_p_T(_Pref(_qp, _state), (*(_T[0]))[_i]);
+    auto _avetemp = ((*(_T[0]))[_i] + (*(_T[_T.size() - 1]))[_i]) / 2;
+    auto _mu = _fp.mu_from_p_T(_Pref(_qp, _state), _avetemp);
+    auto _rhog = _fp.rho_from_p_T(_Pref(_qp, _state), _avetemp);
     // loop over segments
     for (size_t i = 0; i < _n_segments; ++i)
     {
