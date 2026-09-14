@@ -9,8 +9,8 @@
   []
   [friction_regularAD]
     type = CSVDiff
-    input = friction.i
-    csvdiff = 'friction_out.csv'
+    input = ADfriction.i
+    csvdiff = 'ADfriction_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction losses without other head loss sources.'
@@ -24,8 +24,8 @@
   []
   [friction_CPAD]
     type = CSVDiff
-    input = frictionCP.i
-    csvdiff = 'frictionCP_out.csv'
+    input = ADfrictionCP.i
+    csvdiff = 'ADfrictionCP_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction losses without other head loss sources.'
@@ -40,8 +40,8 @@
   []
   [forms_regularAD]
     type = CSVDiff
-    input = forms.i
-    csvdiff = 'forms_out.csv'
+    input = ADforms.i
+    csvdiff = 'ADforms_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction losses and forms losses.'
@@ -56,8 +56,8 @@
   []
   [forms_CPAD]
     type = CSVDiff
-    input = formsCP.i
-    csvdiff = 'formsCP_out.csv'
+    input = ADformsCP.i
+    csvdiff = 'ADformsCP_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction losses and forms losses.'
@@ -72,8 +72,8 @@
   []
   [grav_regularAD]
     type = CSVDiff
-    input = grav.i
-    csvdiff = 'grav_out.csv'
+    input = ADgrav.i
+    csvdiff = 'ADgrav_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'gravity=9.81 alpha=1.570795 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction losses and gravity losses.'
@@ -88,8 +88,8 @@
   []
   [grav_CPAD]
     type = CSVDiff
-    input = gravCP.i
-    csvdiff = 'gravCP_out.csv'
+    input = ADgravCP.i
+    csvdiff = 'ADgravCP_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'gravity=9.81 alpha=1.570795 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction losses and gravity losses.'
@@ -104,8 +104,8 @@
   []
   [pump_regularAD]
     type = CSVDiff
-    input = pump.i
-    csvdiff = 'pump_out.csv'
+    input = ADpump.i
+    csvdiff = 'ADpump_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'pump=10130 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction losses and pump gain.'
@@ -120,8 +120,8 @@
   []
   [pump_CPAD]
     type = CSVDiff
-    input = pumpCP.i
-    csvdiff = 'pumpCP_out.csv'
+    input = ADpumpCP.i
+    csvdiff = 'ADpumpCP_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'pump=10130 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction losses and pump gain.'
@@ -136,8 +136,8 @@
   []
   [full_regularAD]
     type = CSVDiff
-    input = full.i
-    csvdiff = 'full_out.csv'
+    input = ADfull.i
+    csvdiff = 'ADfull_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
@@ -152,40 +152,40 @@
   []
   [full_CPAD]
     type = CSVDiff
-    input = fullCP.i
-    csvdiff = 'fullCP_out.csv'
+    input = ADfullCP.i
+    csvdiff = 'ADfullCP_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_regularexp]
     type = CSVDiff
-    input = full.i
-    csvdiff = 'full_out.csv'
+    input = full_exp.i
+    csvdiff = 'full_exp_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the regular flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_regularADexp]
     type = CSVDiff
-    input = full.i
-    csvdiff = 'full_out.csv'
+    input = ADfull_exp.i
+    csvdiff = 'ADfull_exp_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_CPexp]
     type = CSVDiff
-    input = fullCP.i
-    csvdiff = 'fullCP_out.csv'
+    input = fullCP_exp.i
+    csvdiff = 'fullCP_exp_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the coupled pressure flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
   []
   [full_CPADexp]
     type = CSVDiff
-    input = fullCP.i
-    csvdiff = 'fullCP_out.csv'
+    input = ADfullCP_exp.i
+    csvdiff = 'ADfullCP_exp_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 pump=10130 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel ScalarKernels/pipe1_mom/is_implicit=False'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel with explicit state properties must converge to the analytical mass flow rate resulting from a combination of momentum sources/sinks.'
@@ -200,8 +200,8 @@
   []
   [reverse_flow_regularAD]
     type = CSVDiff
-    input = regular_reverse.i
-    csvdiff = 'regular_reverse_out.csv'
+    input = ADregular_reverse.i
+    csvdiff = 'ADregular_reverse_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 dP=10130 ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from friction, forms, and gravity while mass flows in the opposite direction.'
@@ -216,8 +216,8 @@
   []
   [reverse_flow_CPAD]
     type = CSVDiff
-    input = coupledpressure_reverse.i
-    csvdiff = 'coupledpressure_reverse_out.csv'
+    input = ADcoupledpressure_reverse.i
+    csvdiff = 'ADcoupledpressure_reverse_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'forms=1.0 gravity=9.81 alpha=1.570795 min=-1.0 ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from friction, forms, and gravity while mass flows in the opposite direction.'
@@ -231,8 +231,8 @@
   []
   [twoseg_regularAD]
     type = CSVDiff
-    input = regular_twoseg.i
-    csvdiff = 'regular_twoseg_out.csv'
+    input = ADregular_twoseg.i
+    csvdiff = 'ADregular_twoseg_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md'
     cli_args = 'ScalarKernels/pipe1_mom/type=ADIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD regular flow path kernel must converge to the analytical mass flow rate resulting from any combination of source and sink terms over N segments.'
@@ -246,8 +246,8 @@
   []
   [twoseg_CPAD]
     type = CSVDiff
-    input = coupledpressure_twoseg.i
-    csvdiff = 'coupledpressure_twoseg_out.csv'
+    input = ADcoupledpressure_twoseg.i
+    csvdiff = 'ADcoupledpressure_twoseg_out.csv'
     design = 'CoupledPressureIncompressibleMomentumSPScalarKernel.md'
     cli_args = 'ScalarKernels/pipe1_mom/type=ADCoupledPressureIncompressibleMomentumSPScalarKernel'
     requirement = 'Given a prescribed pressure drop, the AD coupled pressure flow path kernel must converge to the analytical mass flow rate resulting from any combination of source and sink terms over N segments.'
@@ -261,24 +261,24 @@
   []
   [heatAD]
     type = CSVDiff
-    input = heat.i
-    csvdiff = 'heat_out.csv'
+    input = ADheat.i
+    csvdiff = 'ADheat_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature.'
   []
   [heatexp]
     type = CSVDiff
-    input = heat.i
-    csvdiff = 'heat_out.csv'
+    input = heat_exp.i
+    csvdiff = 'heat_exp_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/is_implicit=False'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and energy kernels must converge approximately to the analytical Temperature with explicit property integration.'
   []
   [heatADexp]
     type = CSVDiff
-    input = heat.i
-    csvdiff = 'heat_out.csv'
+    input = ADheat_exp.i
+    csvdiff = 'ADheat_exp_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/is_implicit=False ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature with explicit property integration.'
@@ -293,8 +293,8 @@
   []
   [heatAD_reverse]
     type = CSVDiff
-    input = heatreverse.i
-    csvdiff = 'heatreverse_out.csv'
+    input = ADheatreverse.i
+    csvdiff = 'ADheatreverse_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'min=-1.0 dP=10130 ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop resulting in reverse flow, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature.'
@@ -308,8 +308,8 @@
   []
   [heatAD_twoseg]
     type = CSVDiff
-    input = heat_twoseg.i
-    csvdiff = 'heat_twoseg_out.csv'
+    input = ADheat_twoseg.i
+    csvdiff = 'ADheat_twoseg_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of 2 segments.'
@@ -323,8 +323,8 @@
   []
   [heatAD_threeseg]
     type = CSVDiff
-    input = heat_threeseg.i
-    csvdiff = 'heat_threeseg_out.csv'
+    input = ADheat_threeseg.i
+    csvdiff = 'ADheat_threeseg_out.csv'
     design = 'IncompressibleMomentumSPScalarKernel.md IncompressibleEnergySPScalarKernel.md'
     cli_args = 'ScalarKernels/temp1/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp2/type=ADIncompressibleEnergySPScalarKernel ScalarKernels/temp3/type=ADIncompressibleEnergySPScalarKernel'
     requirement = 'Given prescribed inlet, outlet, and wall temperatures as well as pressure drop, the flow path momentum and AD energy kernels must converge approximately to the analytical Temperature of 3 segments.'

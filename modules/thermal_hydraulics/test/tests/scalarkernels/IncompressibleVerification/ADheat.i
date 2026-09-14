@@ -164,14 +164,13 @@ area = ${fparse 3.14159* ${R}^2}
   type = Transient
   start_time = 0
   end_time = 100.0
-  line_search = 'none'
   [TimeStepper]
     type = IterationAdaptiveDT
     growth_factor = 1.4
     dt = 5
   []
   solve_type = 'PJFNK'
-  nl_abs_tol = 1e-08
+  nl_abs_tol = 1e-09
   l_tol = 1e-07
 []
 
