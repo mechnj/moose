@@ -56,8 +56,8 @@ protected:
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _perimeters;
   /// Length of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _lengths;
-  /// Angle with respect to the horizontal of each segment
-  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _alphas;
+  /// Height change of each segment
+  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _dHs;
   /// Forms loss coefficients of each segment
   std::vector<const Moose::Functor<GenericReal<is_ad>> *> _forms_losses;
   /// Pump pressure gains of each segment
