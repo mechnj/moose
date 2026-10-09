@@ -168,7 +168,8 @@ IncompressiblePathAction::act()
     // Add regular momentum kernel
     if (regular_momentum)
     {
-      auto kernel_type = "ADIncompressibleMomentumSPScalarKernel" InputParameters params =
+      auto kernel_type = "ADIncompressibleMomentumSPScalarKernel";
+      InputParameters params =
           _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
               getParam<NonlinearVariableName>("mass_flow_rate");
       params.set<ScalarCoupleable::coupledScalarComponents>("reference_pressure_drop") =
@@ -203,10 +204,10 @@ IncompressiblePathAction::act()
     // Add coupled pressure momentum kernel
     else
     {
-      auto kernel_type =
-          "ADCoupledPressureIncompressibleMomentumSPScalarKernel" InputParameters params =
-              _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
-                  getParam<NonlinearVariableName>("reference_pressure_drop");
+      auto kernel_type = "ADCoupledPressureIncompressibleMomentumSPScalarKernel";
+      InputParameters params =
+          _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
+              getParam<NonlinearVariableName>("reference_pressure_drop");
       params.set<ScalarCoupleable::coupledScalarComponents>("coupled_mass_flow_rate") =
           getParam<NonlinearVariableName>("mass_flow_rate");
       std::vector<std::string> temps = {} for (unsigned int i = 0; i < n_seg; i++)
@@ -238,7 +239,8 @@ IncompressiblePathAction::act()
           kernel_type, getParam<NonlinearVariableName>("reference_pressure_drop"), params);
     }
     // Add inlet temperature kernel
-    auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+    auto kernel_type = "ADIncompressibleEnergySPScalarKernel";
+    InputParameters params =
         _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
             "T" + Moose::stringify(seg_off);
     params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
@@ -265,7 +267,8 @@ IncompressiblePathAction::act()
     params.set<MooseFunctorName>("length") = lengths[0];
     _problem->addKernel(kernel_type, "T" + Moose::stringify(seg_off);, params);
     // Add outlet temperature kernel
-    auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+    auto kernel_type = "ADIncompressibleEnergySPScalarKernel";
+    InputParameters params =
         _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
             "T" + Moose::stringify(seg_off + n_seg);
     params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
@@ -295,7 +298,8 @@ IncompressiblePathAction::act()
     // Add all other temperature kernels
     for (unsigned int i = 1; i < n_seg - 1; i++)
     {
-      auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+      auto kernel_type = "ADIncompressibleEnergySPScalarKernel";
+      InputParameters params =
           _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
               "T" + Moose::stringify(seg_off + i);
       params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
@@ -325,9 +329,10 @@ IncompressiblePathAction::act()
     if (wall_cht)
     {
       // Add inlet wall temperature kernel
-      auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+      auto kernel_type = "ADInnerPipeWallTemperatureScalarKernel";
+      InputParameters params =
           _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
-              "T" + Moose::stringify(seg_off);
+              "Tw" + Moose::stringify(seg_off);
       params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
           getParam<NonlinearVariableName>("mass_flow_rate");
       params.set<ScalarCoupleable::coupledScalarComponents>("inlet_temperature") =
@@ -352,7 +357,8 @@ IncompressiblePathAction::act()
       params.set<MooseFunctorName>("length") = lengths[0];
       _problem->addKernel(kernel_type, "T" + Moose::stringify(seg_off);, params);
       // Add outlet temperature kernel
-      auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+      auto kernel_type = "ADIncompressibleEnergySPScalarKernel";
+      InputParameters params =
           _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
               "T" + Moose::stringify(seg_off + n_seg);
       params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
@@ -382,7 +388,8 @@ IncompressiblePathAction::act()
       // Add all other temperature kernels
       for (unsigned int i = 1; i < n_seg - 1; i++)
       {
-        auto kernel_type = "ADIncompressibleEnergySPScalarKernel" InputParameters params =
+        auto kernel_type = "ADIncompressibleEnergySPScalarKernel";
+        InputParameters params =
             _factory.getValidParams(kernel_type) params.set<NonlinearVariableName>("variable") =
                 "T" + Moose::stringify(seg_off + i);
         params.set<ScalarCoupleable::coupledScalarComponents>("mass_flow_rate") =
