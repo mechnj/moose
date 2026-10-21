@@ -10,7 +10,7 @@ Tout = 293.15
 mu = 0.001002
 cp = 4185.0
 k = 0.598
-alpha = 0.0
+dH = 0.0
 epsilon = 0.0001
 forms = 0.0
 pump = 0.0
@@ -60,7 +60,7 @@ area = '${fparse 3.14159* ${R}^2}'
 
 [ScalarKernels]
   [pipe1_mom]
-    type = IncompressibleMomentumSPScalarKernel
+    type = ADIncompressibleMomentumSPScalarKernel
     variable = 'm1'
     reference_pressure_drop = 'dPc'
     temperatures = 'T1'
@@ -69,7 +69,7 @@ area = '${fparse 3.14159* ${R}^2}'
     areas = '${area}'
     perimeters = '${fparse 2*3.14159* ${R}}'
     lengths = '${length}'
-    alphas = '${alpha}'
+    height_changes = '${dH}'
     forms_losses = '${forms}'
     pump_pressures = '${pump}'
     roughnesses = '${epsilon}'
@@ -77,11 +77,11 @@ area = '${fparse 3.14159* ${R}^2}'
     is_implicit = True
   []
   [pipe1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'm1'
   []
   [temp1]
-    type = IncompressibleEnergySPScalarKernel
+    type = ADIncompressibleEnergySPScalarKernel
     mass_flow_rate = 'm1'
     inlet_temperature = 'T0'
     outlet_temperature = 'T2'
@@ -95,7 +95,7 @@ area = '${fparse 3.14159* ${R}^2}'
     is_implicit = True
   []
   [temp1_DT]
-    type = ODETimeDerivative
+    type = ADScalarTimeDerivative
     variable = 'T1'
   []
   [temp0]
