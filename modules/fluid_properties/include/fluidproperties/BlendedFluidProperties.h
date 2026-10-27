@@ -12,53 +12,44 @@
 #include "SinglePhaseFluidProperties.h"
 
 /**
- * Fluid properties provided as a mixture of two other fluid properties with AD overrides
+ * Fluid properties provided as a blend of a liquid and a gas fluid properties object, weighted by
+ * a liquid volume fraction phi in [0, 1] that is read from a postprocessor.
+ *
+ * Blending rules:
+ *  - rho: volume-fraction weighted,  rho = phi rho_l + (1 - phi) rho_g
+ *  - cp : mass-weighted,             cp  = sum(phi_i rho_i cp_i) / sum(phi_i rho_i)
+ *  - k  : volume-fraction weighted
+ *  - mu : log-weighted (geometric),  mu  = mu_l^phi mu_g^(1 - phi)
+ *
+ * For each property the Real, Real-with-derivatives, ADReal and ADReal-with-derivatives
+ * (p, T) interfaces are overridden together, so no overloads of the base class are hidden.
+ * The liquid fraction is treated as a constant (non-AD) value for each evaluation, so no
+ * derivatives with respect to it are propagated.
  */
 class BlendedFluidProperties : public SinglePhaseFluidProperties
 {
 public:
-  BlendedFluidProperties(const InputParameters & parameters);
   static InputParameters validParams();
 
-  virtual ADReal phi() const;
+  BlendedFluidProperties(const InputParameters & parameters);
 
-  /**
-   * Density from pressure and temperature
-   *
-   * @param[in] p   pressure (Pa)
-   * @param[in] T   temperature (K)
-   * @return density (kg/m$^3$)
-   */
-  virtual ADReal rho_from_p_T(ADReal p, ADReal T) const;
+  virtual std::string fluidName() const override;
 
-  /**
-   * isobaric specific heat from pressure and temperature
-   *
-   * @param[in] p   pressure (Pa)
-   * @param[in] T   temperature (K)
-   * @return cp (J/kg/.K)
-   */
-  virtual ADReal cp_from_p_T(ADReal p, ADReal T) const;
+  /// Liquid volume fraction, clamped to [0, 1]
+  Real phi() const;
 
-  /**
-   * thermal conductivity from pressure and temperature
-   *
-   * @param[in] p   pressure (Pa)
-   * @param[in] T   temperature (K)
-   * @return k (W/m./K)
-   */
-  virtual ADReal k_from_p_T(ADReal p, ADReal T) const;
-
-  /**
-   * dynamic viscosity from pressure and temperature
-   *
-   * @param[in] p   pressure (Pa)
-   * @param[in] T   temperature (K)
-   * @return mu (Pa.s)
-   */
-  virtual ADReal mu_from_p_T(ADReal p, ADReal T) const;
+  // Declares Real, Real+derivatives, ADReal and ADReal+derivatives overrides plus the templated
+  // implementations (see the definitions in BlendedFluidProperties.C)
+  propfuncWithDefinitionOverride(rho, p, T);
+  propfuncWithDefinitionOverride(cp, p, T);
+  propfuncWithDefinitionOverride(k, p, T);
+  propfuncWithDefinitionOverride(mu, p, T);
 
 protected:
-  const SinglePhaseFluidProperties &_l, &_g;
-  const PostprocessorValue & _phi;
+  /// Liquid-phase fluid properties
+  const SinglePhaseFluidProperties & _fp_liquid;
+  /// Gas-phase fluid properties
+  const SinglePhaseFluidProperties & _fp_gas;
+  /// Liquid volume fraction (raw, unclamped)
+  const PostprocessorValue & _liquid_fraction;
 };
